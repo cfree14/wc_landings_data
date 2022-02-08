@@ -1,0 +1,21 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Ignore some folders
+calfish_paper/drafts/
+
+# Hide Google Maps API key
+data/pacfin/ggmap_api_key.R
+
+# Ignore large raw data
+data/cdfw/public/raw
+data/cdfw/public/intermediate
+data/swfsc/raw
+
+# Ignore confidential data
+data/cdfw/confidential
+data/odfw/confidential
+data/wdfw/confidential
+data/mexico/datamares/confidential
