@@ -83,7 +83,7 @@ cdfw1 <- cdfw_waters %>%
 # CDFW ports
 cdfw2 <- cdfw_ports %>% 
   # Remove shipments
-  filter(type=="Landings") %>% 
+  # filter(type=="Landings") %>% 
   # Annual sums
   group_by(year) %>% 
   summarise(landings_lb=sum(landings_lb, na.rm=T)) %>% 
