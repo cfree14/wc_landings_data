@@ -13,8 +13,8 @@ library(tabulizer)
 library(pdftools)
 
 # Directories
-outputdir <- "data/landings/cdfw/public/website/cpfv/processed"
-plotdir <- "data/landings/cdfw/public/website/cpfv/figures"
+outputdir <- "data/cdfw/public/website/cpfv/processed"
+plotdir <- "data/cdfw/public/website/cpfv/figures"
 
 # To do: 
 # You can definitely salvage 1999 from this
@@ -28,7 +28,7 @@ plotdir <- "data/landings/cdfw/public/website/cpfv/figures"
 file_key <- purrr::map_df(2000:2019, function(x){
   
   # Get files
-  basedir <- "data/landings/cdfw/public/website/raw"
+  basedir <- "data/cdfw/public/website/raw"
   datadir <- file.path(basedir, x, "cpfv")
   yfiles <- list.files(datadir, pattern=".pdf")
   
@@ -79,7 +79,7 @@ file_check <- file_key %>%
 data_orig <- purrr::map_df(2000:2019, function(x) {
   
   # Directory
-  basedir <- "data/landings/cdfw/public/website/raw"
+  basedir <- "data/cdfw/public/website/raw"
   datadir <- file.path(basedir, x, "cpfv")
 
   # Identify files

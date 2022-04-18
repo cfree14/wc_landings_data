@@ -9,12 +9,10 @@ rm(list = ls())
 # Packages
 library(tidyverse)
 library(lubridate)
-library(tabulizer)
-library(pdftools)
 
 # Directories
-outputdir <- "data/landings/cdfw/public/cpfv/processed"
-plotdir <- "data/landings/cdfw/public/cpfv/figures"
+outputdir <- "data/cdfw/public/website/cpfv/processed"
+plotdir <- "data/cdfw/public/website/cpfv/figures"
 
 # Read data
 data <- read.csv(file.path(outputdir, "CDFW_2000_2019_cpfv_landings_by_port_complex_species.csv"), as.is=T)
@@ -42,7 +40,7 @@ my_theme <-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
 data_tots_plot <- data_tots %>% 
   mutate(landings_n=landings_n/1e4,
          anglers_n=anglers_n/1e3) %>% 
-  gather(key="metric", value="value", 4:ncol(.)) %>% 
+  gather(key="metric", value="value", 5:ncol(.)) %>% 
   mutate(metric=recode_factor(metric, 
                               "cpfvs_n"="Number of\nCPFVs reporting",
                               "anglers_n"="Number of anglers\n(1000s of people)",
@@ -50,7 +48,7 @@ data_tots_plot <- data_tots %>%
   group_by(year, metric) %>% 
   mutate(prop=value/sum(value)) %>%  
   ungroup() %>% 
-  gather(key="stat", value="value", 5:ncol(.)) %>% 
+  gather(key="stat", value="value", 6:ncol(.)) %>% 
   mutate(stat=recode_factor(stat, "value"="Value", "prop"="Proportion")) 
 
 # Plot data
