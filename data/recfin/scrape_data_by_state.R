@@ -53,7 +53,7 @@ base_url <- "https://reports.psmfc.org/recfin/f?p=601:1000:5937884473268:::::"
 remDr$navigate(base_url)
 
 # Loop through years
-years <- c(2018)
+years <- 2001:2021
 for(i in 1:length(years)){
   
   # Year
@@ -62,9 +62,13 @@ for(i in 1:length(years)){
   print(year)
 
   # Click CTE002 Total Mortality by State
-  submit_button <- remDr$findElement(using="link text", "CTE002 Total Mortality by State")
-  submit_button$clickElement()
+  dataset_button <- remDr$findElement(using="link text", "CTE002 Total Mortality by State")
+  dataset_button$clickElement()
   Sys.sleep(3)
+  
+  # Click Detailed Report
+  report_select <- remDr$findElement(using="xpath", "//select[@id = 'P0_REPORT_SELECTOR']/option[@value='report-d']")
+  report_select$clickElement()
   
   # Click Filter button
   filter_button <- remDr$findElement(using="id", "B88333917457936928")

@@ -37,11 +37,16 @@ data_orig <- purrr::map_df(files2merge, function(x){
 # Format data
 data <- data_orig %>% 
   # Rename
-  rename(year=filename, comm_name=SPECIES) %>% 
+  rename(year=filename, 
+         comm_name=SPECIES, 
+         year1=RECFIN_YEAR,
+         mode=RECFIN_MODE_NAME,
+         water_area=RECFIN_WATER_AREA_NAME,
+         trip_type=RECFIN_TRIP_TYPE_NAME) %>% 
   # Arrange
   select(year, everything()) %>% 
   # Gather 
-  gather(key="data_long", value="catch", 3:ncol(.)) %>%
+  gather(key="data_long", value="catch", 7:ncol(.)) %>%
   # Format year
   mutate(year=year %>% gsub("CTE002-|.csv", "", .) %>% as.numeric()) %>% 
   # Get state/mode
@@ -52,18 +57,31 @@ data <- data_orig %>%
          status=stringr::str_to_title(status),
          status=recode(status, 
                        "Released-Dead"="Released (dead)")) %>% 
+  # Format mode
+  mutate(mode=stringr::str_to_title(mode),
+         water_area=stringr::str_to_title(water_area),
+         water_area=recode(water_area, 
+                           "Ocean > 3 Miles"="Ocean (>3 miles)",
+                           "Ocean <= 3 Miles"="Ocean (≤3 miles)"), 
+         trip_type=stringr::str_to_title(trip_type)) %>% 
   # Reduce
   filter(!is.na(catch)) %>% 
   # Spread
   spread(key="units", value="catch") %>% 
   rename(catch_n=NUM, catch_mt=MT) %>% 
   # Arrange
-  select(state, comm_name, year, status, catch_n, catch_mt, everything()) %>% 
-  arrange(state, comm_name, year, status)
+  select(-year1) %>% 
+  select(state, water_area, mode, trip_type, comm_name,
+         year, status, catch_n, catch_mt, everything()) %>% 
+  arrange(state, water_area, mode, trip_type, comm_name, year, status)
 
 # Inspect
 table(data$state)
 table(data$status)
+table(data$water_area)
+table(data$mode)
+table(data$trip_type)
+
 
 # Export data
 ################################################################################

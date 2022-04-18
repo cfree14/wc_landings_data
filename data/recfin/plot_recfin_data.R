@@ -24,28 +24,29 @@ noaa_orig <- wcfish::noaa
 
 # Read CDFW data
 cdfw_cpfv1_orig <- wcfish::cdfw_cpfv
-cdfw_cpfv2_orig <- read.csv("~/Dropbox/Chris/UCSB/projects/wc_landings_data/data/cdfw/public/website/cpfv/processed/CDFW_2000_2019_cpfv_landings_statewide.csv", as.is=T)
+cdfw_cpfv2_orig <- wcfish::cdfw_cpfv_port
 
 
 # Format CA data
 ################################################################################
 
-# CA HMS by port
+# CA HMS statewide
 cdfw_cpfv1 <- cdfw_cpfv1_orig %>% 
-  group_by(year, port_complex) %>%
+  group_by(year) %>%
   summarize(landings_n=sum(landings_n, na.rm = T))
 
-# CA HMS statewide
+# CA HMS by port
 cdfw_cpfv2 <- cdfw_cpfv2_orig %>% 
-  group_by(year) %>%
+  group_by(year, port_complex) %>%
   summarize(landings_n=sum(landings_n, na.rm = T))
   
 # Plot data
-g <- ggplot(cdfw_cpfv1, aes(x=year, y=landings_n/1e6, fill=port_complex)) +
+g <- ggplot(cdfw_cpfv2, aes(x=year, y=landings_n/1e6, fill=port_complex)) +
   geom_bar(stat="identity") +
-  geom_line(data=cdfw_cpfv2, aes(x=year, y=landings_n/1e6), inherit.aes = F) +
+  geom_line(data=cdfw_cpfv1, aes(x=year, y=landings_n/1e6), inherit.aes = F) +
   theme_bw()
 g
+
 
 # Format data
 ################################################################################
