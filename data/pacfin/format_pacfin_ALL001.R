@@ -10,14 +10,14 @@ rm(list = ls())
 library(tidyverse)
 
 # Directories
-datadir <- "data/landings/pacfin/raw/ALL/ALL001"
-outputdir <- "data/landings/pacfin/processed"
+datadir <- "data/pacfin/raw/ALL/ALL001"
+outputdir <- "data/pacfin/processed"
 
 # Read data
-wa_orig <- read.csv(file.path(datadir, "ALL001-Washington-1980---2021.csv"), as.is=T)
-or_orig <- read.csv(file.path(datadir, "ALL001-Oregon-1980---2021.csv"), as.is=T)
-ca_orig <- read.csv(file.path(datadir, "ALL001-California-1980---2021.csv"), as.is=T)
-sea_orig <- read.csv(file.path(datadir, "ALL001-At-Sea-1980---2021.csv"), as.is=T)
+wa_orig <- read.csv(file.path(datadir, "ALL001-Washington-1980---2021.csv"), as.is=T, na.strings = "")
+or_orig <- read.csv(file.path(datadir, "ALL001-Oregon-1980---2021.csv"), as.is=T, na.strings = "")
+ca_orig <- read.csv(file.path(datadir, "ALL001-California-1980---2021.csv"), as.is=T, na.strings = "")
+sea_orig <- read.csv(file.path(datadir, "ALL001-At-Sea-1980---2021.csv"), as.is=T, na.strings = "")
 
 # Read codes
 port_key <- read.csv(file.path(outputdir, "pacfin_port_codes_clean.csv"), as.is=T)
@@ -34,26 +34,61 @@ spp_key <- read.csv(file.path(outputdir, "pacfin_species_codes_clean.csv"), as.i
 data <- bind_rows(ca_orig, or_orig, wa_orig, sea_orig) %>% 
   # Rename
   janitor::clean_names("snake") %>% 
-  rename(year=landing_year, state=agency_code, 
-         mgmt_group_code=management_group_code, complex_code=complex,
-         comm_name_orig=pacfin_species_common_name, species_code=pacfin_species_code,
-         value_usd=exvessel_revenue, landings_mt=landed_weight_mtons,
+  rename(year=landing_year, 
+         state=agency_code, 
+         mgmt_group_code=management_group_code, 
+         complex_code=complex,
+         comm_name_orig=pacfin_species_common_name, 
+         species_code=pacfin_species_code,
+         value_usd=exvessel_revenue, 
+         landings_mt=landed_weight_mtons,
          price_usd_lb=landed_weight_ppp) %>% 
   # Format state
   mutate(state=recode(state, "C"="California", "O"="Oregon", "W"="Washington", "AT-SEA"="At-Sea")) %>% 
+  # Format management group
+  mutate(mgmt_group=recode(mgmt_group_code,
+                           "CPEL"="Coastal pelagic species", 
+                           "CRAB"="Crabs",   
+                           "GRND"="Groundfish", 
+                           "HMSP"="Highly migratory species",   
+                           "OTHR"="Other",   
+                           "SAMN"="Salmon",   
+                           "SHLL"="Shellfish",   
+                           "SRMP"="Shrimp",   
+                           "XXXX"="Withheld for confidentiality")) %>% 
+  # Format complex
+  mutate(complex=recode(complex_code, 
+                        "ABLN"="Abalone",
+                        "BASS"="Sea bass",
+                        "CLAM"="Clam",
+                        "ECHN"="Echinoderm",
+                        "FLAT"="Flatfish",
+                        "KCRB"="King crab",
+                        "MGRN"="Miscellaneous groundfish",
+                        "MLSK"="Mollusk",
+                        "OYST"="Oyster",
+                        "ROCK"="Rockfish",
+                        "ROND"="Roundfish",
+                        "SCAL"="Scallop",
+                        "STRG"="Sturgeon",
+                        "TCRB"="Tanner crab",
+                        "TUNA"="Tuna",
+                        "WETF"="Wet fish")) %>% 
   # Add common/scientific name
-  left_join(spp_key %>% select(spp_code, comm_name, sci_name), by=c("species_code"="spp_code")) %>% 
+  left_join(spp_key %>% select(spp_code, comm_name, sci_name), by=c("species_code"="spp_code")) %>%
   # Convert landings
   mutate(landings_kg=landings_mt*1000,
          landings_lb=measurements::conv_unit(landings_kg, "kg", "lbs")) %>% 
   # Arrange
-  select(state, year, mgmt_group_code, complex_code, 
+  select(state, year, mgmt_group_code, mgmt_group, complex_code, complex,
          species_code, comm_name_orig, comm_name, sci_name,
          value_usd, landings_mt, landings_kg, landings_lb, price_usd_lb, confidential_flag, everything())
 
 # Inspect data
 str(data)
 freeR::complete(data)
+
+# Inspect data
 range(data$year)
 table(data$state)
 table(data$mgmt_group_code)

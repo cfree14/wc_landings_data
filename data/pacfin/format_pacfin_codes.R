@@ -10,8 +10,8 @@ rm(list = ls())
 library(tidyverse)
 
 # Directories
-inputdir <- "data/landings/pacfin/raw/codes"
-outputdir <- "data/landings/pacfin/processed"
+inputdir <- "data/pacfin/raw/codes"
+outputdir <- "data/pacfin/processed"
 
 # Read codes
 list.files(inputdir)
@@ -21,7 +21,7 @@ list.files(inputdir)
 ################################################################################
 
 # Read data
-spp_code_orig <- read.csv(file.path(inputdir, "pacfin_species_code_list_alphabetical.csv"), as.is=T, na.strings="N/A")
+spp_code_orig <- read.csv(file.path(inputdir, "pacfin_species_code_list_alphabetical.csv"), as.is=T, na.strings=c("N/A", ""))
 
 # Format data
 spp_code <- spp_code_orig %>% 
@@ -31,7 +31,11 @@ spp_code <- spp_code_orig %>%
          mgmt_group_code=management_group_code, complex_code=complex) %>% 
   # Format species names
   mutate(comm_name=comm_name %>% gsub("__", "", .) %>% stringr::str_to_sentence(),
-         sci_name=stringr::str_to_sentence(sci_name))
+         sci_name=stringr::str_to_sentence(sci_name)) %>% 
+  # Solve duplicate problems
+  group_by(spp_code, comm_name, sci_name) %>% 
+  summarise(mgmt_group_code=paste(na.omit(mgmt_group_code), collapse=", "),
+            complex_code=paste(na.omit(complex_code), collapse=", "))
 
 # Inspect
 head(spp_code)  

@@ -10,8 +10,8 @@ rm(list = ls())
 library(tidyverse)
 
 # Directories
-datadir <- "data/landings/pacfin/raw/ALL/ALL006"
-outputdir <- "data/landings/pacfin/processed"
+datadir <- "data/pacfin/raw/ALL/ALL006"
+outputdir <- "data/pacfin/processed"
 
 # Read codes
 port_key <- read.csv(file.path(outputdir, "pacfin_port_codes_clean.csv"), as.is=T)

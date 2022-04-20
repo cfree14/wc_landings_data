@@ -10,8 +10,8 @@ rm(list = ls())
 library(tidyverse)
 
 # Directories
-datadir <- "data/landings/pacfin/raw/ALL/ALL005"
-outputdir <- "data/landings/pacfin/processed"
+datadir <- "data/pacfin/raw/ALL/ALL005"
+outputdir <- "data/pacfin/processed"
 
 # Read data
 ca_orig <- read.csv(file.path(datadir, "ALL005-C-1980---2020.csv"), as.is=T, na.strings=c("", "...."))
