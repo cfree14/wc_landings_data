@@ -10,9 +10,9 @@ rm(list = ls())
 library(tidyverse)
 
 # Directories
-inputdir <- "data/landings/noaa/raw"
-outputdir <- "data/landings/noaa/processed"
-plotdir <- "data/landings/noaa/figures"
+inputdir <- "data/noaa/raw"
+outputdir <- "data/noaa/processed"
+plotdir <- "data/noaa/figures"
 
 # Read data
 data_orig <- read.csv(file.path(inputdir, "foss_landings.csv"), as.is=T, na.strings="")
@@ -44,7 +44,9 @@ data <- data_orig %>%
          landings_lb=landings_lb %>% gsub(",", "", .) %>% as.numeric()) %>% 
   # Format species
   mutate(comm_name_orig=comm_name_orig %>% stringr::str_trim(),
-         sci_name_orig=sci_name_orig %>% stringr::str_trim())
+         sci_name_orig=sci_name_orig %>% stringr::str_trim()) %>% 
+  # Mark whether species specific
+  mutate(level=ifelse(grepl("\\*", comm_name_orig), "generic", "species"))
   
 # Inspect data
 str(data)
@@ -55,86 +57,103 @@ table(data$fishery)
 table(data$confidentiality)
 table(data$summary_type)
 
+
 # Build species key
 ################################################################################
 
 # Build species key
-spp_key <- data %>%
-  # Unique species
-  filter(!is.na(sci_name_orig)) %>% 
-  select(comm_name_orig, sci_name_orig) %>% 
-  unique() %>% 
-  arrange(comm_name_orig) %>% 
-  # New columns
-  mutate(comm_name=comm_name_orig %>% gsub("\\*", "", .) %>% stringr::str_trim() %>% stringr::str_to_sentence(),
-         comm_name=ifelse(comm_name=="", "Unknown", comm_name),
-         sci_name=sci_name_orig %>% stringr::str_trim() %>% stringr::str_to_sentence(),
-         sci_name=ifelse(comm_name=="Unknown", "Unknown spp.", sci_name),
-         level=ifelse(grepl("\\*", comm_name_orig), "group", "species")) %>% 
-  # Fix group level
-  mutate(level=ifelse(grepl("spp", sci_name), "group", level),
-         sci_name=gsub(" spp.", "", sci_name) %>% stringr::str_trim(),
-         sci_name=ifelse(level=="group", paste(sci_name, "spp."), sci_name)) %>% 
-  # Fix some scientific names
-  mutate(sci_name=recode(sci_name,
-                         "Antennarius ocellatus"="Fowlerichthys ocellatus",
-                         "Anthias tenuis"="Choranthias tenuis",
-                         "Arpisturus brunneus"="Apristurus brunneus",
-                         "Bathyrajia interrupta"="Bathyraja interrupta",
-                         "Cancer magister"="Metacarcinus magister",
-                         "Carangoides ruber"="Caranx ruber",
-                         "Carcharhinus perezii"="Carcharhinus perezi",
-                         "Clupea pallasii"="Clupea pallasii pallasii",
-                         "Dasyatis americana"="Hypanus americanus",
-                         "Dasyatis sabina"="Hypanus sabinus",
-                         "Elacatinus macrodon"="Tigrigobius macrodon",
-                         "Emblemariopsis diaphanus"="Emblemariopsis diaphana",
-                         "Epinephelus flavolimbatus"="Hyporthodus flavolimbatus",
-                         "Epinephelus mystacinus"="Hyporthodus mystacinus",
-                         "Epinephelus nigritus"="Hyporthodus nigritus",
-                         "Epinephelus niveatus"="Hyporthodus niveatus",
-                         "Etrumeus teres"="Etrumeus sadina",
-                         "Gobioides broussonneti"="Gobioides broussonnetii",
-                         "Hemanthias vivanus"="Baldwinella vivanus",
-                         "Hemicranx amblyrhynchus"="Hemicaranx amblyrhynchus",
-                         "Holocanthus bermudensis"="Holacanthus bermudensis",
-                         "Hypselodoris edenticulata"="Felimare picta",
-                         "Kyphosus sectator"="Kyphosus sectatrix",
-                         "Lbatrossia pectoralis"="Albatrossia pectoralis",
-                         "Lepisosteus spatula"="Atractosteus spatula",
-                         "Lipogramma trilineatum"="Lipogramma trilineata",
-                         "Loligo opalescens"="Doryteuthis opalescens",
-                         "Loligo pealeii"="Doryteuthis pealeii",
-                         "Muraena milaris"="Gymnothorax miliaris",
-                         "Nassarius obsoletus"="Ilyanassa obsoleta",
-                         "Octopus macropus"="Callistoctopus macropus",
-                         "Paralichthys oblongus"="Hippoglossina oblonga",
-                         "Protothaca staminea"="Leukoma staminea",
-                         "Raja binoculata"="Beringraja binoculata",
-                         "Raja inornata"="Beringraja inornata",
-                         "Raja trachura"="Bathyraja trachura",
-                         "Strombus costatus"="Macrostrombus costatus",
-                         "Torpedo nobiliana"="Tetronarce nobiliana",
-                         "Zenopsis conchifera"="Zenopsis conchifer"))
+tsns <- sort(unique(data$tsn))
 
-# Check species
-# species <- spp_key$sci_name[spp_key$level=="species"] %>% unique() %>% sort()
-# freeR::suggest_names(species)
+# Look up tsns
+x <- tsns[3]
+taxa_key_orig <- purrr::map_df(tsns, function(x){
+  
+  # Look up
+  info_list <- taxize::classification(sci_id=x, db="itis")
+  
+  # Level
+  level <- try(taxize::itis_taxrank(x) %>% as.character())
+  if(level=="character(0)" | inherits(level, "try-error")){level <- NA}
+  
+  # Format
+  # If it worked
+  info_df_orig <- info_list[[1]]
+  if( length(info_df_orig) > 1 ){
+    sci_name <- info_df_orig$name[nrow(info_df_orig)]
+    info_df <- info_df_orig %>% 
+      mutate(tsn=x, 
+             level=level,
+             sci_name=sci_name) %>% 
+      select(-id) %>% 
+      spread(key="rank", value="name")
+  }else{
+    sci_name <- NA
+    info_df <- tibble(tsn=x,
+                      level=level,
+                      sci_name=NA)
+  }
+  
+  # Return
+  info_df
+  
+})
+
+# Format key
+taxa_key <- taxa_key_orig %>% 
+  # Simplify
+  select(tsn, level, sci_name, kingdom, phylum, class, order, family, genus, species) %>% 
+  # Fill in gaps
+  mutate(level=ifelse(tsn=="167680,167682", "Genus", level),
+         sci_name=ifelse(tsn=="167680,167682", "Morone", sci_name),
+         level=ifelse(tsn=="0", "Unknown", level),
+         sci_name=ifelse(tsn=="0", "Unknown", sci_name))
+
+# Inspect
+freeR::complete(taxa_key)
+
+# Build common name key
+comm_name_key <- data %>% 
+  # Reduce to TSNs with common name
+  filter(!is.na(comm_name_orig)) %>% 
+  # Format common name (pass 1)
+  mutate(comm_name=comm_name_orig %>% gsub("\\*", "", .) %>% stringr::str_trim()) %>% 
+  # Unique
+  select(comm_name, tsn) %>% 
+  unique() %>% 
+  # Format common name again
+  mutate(comm_name=comm_name %>% wcfish::convert_names(., "regular"))
+
+# Unique
+freeR::which_duplicated(comm_name_key$tsn)
+
 
 # Final formatting
 ################################################################################
 
-data_out <- data
-
 # Format data
-# data_out <- data %>% 
-#   # Add species info
-#   left_join(spp_key %>% select(comm_name_orig, comm_name, sci_name, level)) %>% 
-#   # Arrange
-#   select(region:sci_name_orig, comm_name, sci_name, level, everything())
-# 
-# # Inspect
-# freeR::complete(data_out)
+data_out <- data %>% 
+  # Fix unknown TSN
+  mutate(tsn=ifelse(is.na(tsn), 0, tsn)) %>% 
+  # Add scientific name
+  left_join(taxa_key %>% select(tsn, sci_name), by="tsn") %>% 
+  # Add common name
+  left_join(comm_name_key, by="tsn") %>% 
+  # Fill in a few missing common names
+  mutate(comm_name=ifelse(sci_name=="Cichlasoma urophthalma", "Mayan cichlid", comm_name),
+         comm_name=ifelse(sci_name=="Euleptorhamphus viridis", "Ribbon halfbeak", comm_name),
+         comm_name=ifelse(sci_name=="Icelinus borealis", "Northenr sculpin", comm_name),
+         comm_name=ifelse(sci_name=="Clinocottus analis", "Woolly sculpin", comm_name),
+         comm_name=ifelse(sci_name=="Archistes", "Archistes sculpins", comm_name),
+         comm_name=ifelse(sci_name=="Raja stellulata", "Pacific starry skate", comm_name),
+         comm_name=ifelse(sci_name=="Parupeneus chrysonemus", "Yellow-threaded goatfish", comm_name)) %>% 
+  # Arrange
+  select(region:tsn, comm_name, sci_name, level, comm_name_orig, sci_name_orig, everything())
+
+# Which scientific names don't have common names?
+data_out %>% filter(is.na(comm_name) & !is.na(sci_name)) %>% pull(sci_name) %>% unique()
+
+# Inspect
+freeR::complete(data_out)
 
 
 # Export data
@@ -144,7 +163,8 @@ data_out <- data
 saveRDS(data_out, file.path(outputdir, "NOAA_1950_2019_usa_landings_by_state_species.Rds"))
 
 # Export species key
-write.csv(spp_key, file=file.path(outputdir, "NOAA_usa_commercial_species_key.csv"), row.names=F)
+write.csv(taxa_key, file=file.path(outputdir, "NOAA_usa_commercial_species_key.csv"), row.names=F)
+write.csv(taxa_key_orig, file=file.path(outputdir, "NOAA_usa_commercial_species_key_full.csv"), row.names=F)
 
 
 
