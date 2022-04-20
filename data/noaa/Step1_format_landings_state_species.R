@@ -61,42 +61,52 @@ table(data$summary_type)
 # Build species key
 ################################################################################
 
-# Build species key
-tsns <- sort(unique(data$tsn))
+# Build key?
+build_yn <- F
 
-# Look up tsns
-x <- tsns[3]
-taxa_key_orig <- purrr::map_df(tsns, function(x){
+# If not building
+if(build_yn==F){
+  taxa_key_orig <- read.csv(file.path(outputdir, "NOAA_usa_commercial_species_key_full.csv"), as.is=T)
+}else{
   
-  # Look up
-  info_list <- taxize::classification(sci_id=x, db="itis")
+  # Build species key
+  tsns <- sort(unique(data$tsn))
   
-  # Level
-  level <- try(taxize::itis_taxrank(x) %>% as.character())
-  if(level=="character(0)" | inherits(level, "try-error")){level <- NA}
+  # Look up tsns
+  x <- tsns[3]
+  taxa_key_orig <- purrr::map_df(tsns, function(x){
+    
+    # Look up
+    info_list <- taxize::classification(sci_id=x, db="itis")
+    
+    # Level
+    level <- try(taxize::itis_taxrank(x) %>% as.character())
+    if(level=="character(0)" | inherits(level, "try-error")){level <- NA}
+    
+    # Format
+    # If it worked
+    info_df_orig <- info_list[[1]]
+    if( length(info_df_orig) > 1 ){
+      sci_name <- info_df_orig$name[nrow(info_df_orig)]
+      info_df <- info_df_orig %>% 
+        mutate(tsn=x, 
+               level=level,
+               sci_name=sci_name) %>% 
+        select(-id) %>% 
+        spread(key="rank", value="name")
+    }else{
+      sci_name <- NA
+      info_df <- tibble(tsn=x,
+                        level=level,
+                        sci_name=NA)
+    }
+    
+    # Return
+    info_df
+    
+  })
   
-  # Format
-  # If it worked
-  info_df_orig <- info_list[[1]]
-  if( length(info_df_orig) > 1 ){
-    sci_name <- info_df_orig$name[nrow(info_df_orig)]
-    info_df <- info_df_orig %>% 
-      mutate(tsn=x, 
-             level=level,
-             sci_name=sci_name) %>% 
-      select(-id) %>% 
-      spread(key="rank", value="name")
-  }else{
-    sci_name <- NA
-    info_df <- tibble(tsn=x,
-                      level=level,
-                      sci_name=NA)
-  }
-  
-  # Return
-  info_df
-  
-})
+}
 
 # Format key
 taxa_key <- taxa_key_orig %>% 
@@ -116,7 +126,7 @@ comm_name_key <- data %>%
   # Reduce to TSNs with common name
   filter(!is.na(comm_name_orig)) %>% 
   # Format common name (pass 1)
-  mutate(comm_name=comm_name_orig %>% gsub("\\*", "", .) %>% stringr::str_trim()) %>% 
+  mutate(comm_name=comm_name_orig %>% gsub("\\*", "", .) %>% stringr::str_trim() %>% stringr::str_to_sentence()) %>% 
   # Unique
   select(comm_name, tsn) %>% 
   unique() %>% 
@@ -135,7 +145,9 @@ data_out <- data %>%
   # Fix unknown TSN
   mutate(tsn=ifelse(is.na(tsn), 0, tsn)) %>% 
   # Add scientific name
-  left_join(taxa_key %>% select(tsn, sci_name), by="tsn") %>% 
+  select(-level) %>% 
+  left_join(taxa_key %>% select(tsn, sci_name, level), by="tsn") %>% 
+  mutate(level=tolower(level)) %>% 
   # Add common name
   left_join(comm_name_key, by="tsn") %>% 
   # Fill in a few missing common names
@@ -147,7 +159,9 @@ data_out <- data %>%
          comm_name=ifelse(sci_name=="Raja stellulata", "Pacific starry skate", comm_name),
          comm_name=ifelse(sci_name=="Parupeneus chrysonemus", "Yellow-threaded goatfish", comm_name)) %>% 
   # Arrange
-  select(region:tsn, comm_name, sci_name, level, comm_name_orig, sci_name_orig, everything())
+  select(region:tsn, comm_name, sci_name, level, comm_name_orig, sci_name_orig, everything()) %>% 
+  # Arrange
+  arrange(state, fishery, tsn, year)
 
 # Which scientific names don't have common names?
 data_out %>% filter(is.na(comm_name) & !is.na(sci_name)) %>% pull(sci_name) %>% unique()
