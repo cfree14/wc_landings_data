@@ -1,5 +1,6 @@
 
 # Clear workspace
+# BEWARE - lots of users hate this, I don't
 rm(list = ls())
 
 # Setup
@@ -13,39 +14,14 @@ library(tidyverse)
 downloaddir <- "/Users/cfree/Downloads"
 
 # Erase downloads folder
+# BEWARE! This will delete everything in your downloads folder (you'll see why below)
 unlink(paste0(downloaddir, "/*"))
 
 # Loop through
 ################################################################################
 
-# Firefox profile
-# Based on this link:
-# https://yizeng.me/2014/05/23/download-pdf-files-automatically-in-firefox-using-selenium-webdriver/
-fprof <- makeFirefoxProfile(list(
-  browser.download.folderList = 2L,
-  browser.download.dir = outputdir,
-  browser.helperApps.neverAsk.saveToDisk = "application/pdf",
-  pdfjs.disabled = TRUE,
-  plugin.scan.plid.all = FALSE,
-  plugin.scan.Acrobat = "99.0"
-))
-
-# Firefox profile
-# Based on this link:
-# https://www.seanwarlick.com/post/2016-11-19-rselenium/
-# fprof <- makeFirefoxProfile(list(
-#   browser.download.folderList = 2L,
-#   browser.download.manager.showWhenStarting = FALSE,
-#   browser.download.dir = outputdir,
-#   browser.helperApps.neverAsk.openFile = "application/pdf",
-#   browser.helperApps.neverAsk.saveToDisk = "application/pdf",
-#   browser.helperApps.alwaysAsk.force = FALSE,
-#   browser.download.manager.showAlertOnComplete = FALSE,
-#   browser.download.manager.closeWhenDone = TRUE
-# ))
-
 # Launch RSelenium server and driver
-rD <- rsDriver(browser=c("firefox"), extraCapabilities = fprof)
+rD <- rsDriver(browser=c("firefox"))
 remDr <- rD[["client"]]
 remDr$open(silent=T)
 
