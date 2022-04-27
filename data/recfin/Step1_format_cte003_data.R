@@ -13,6 +13,10 @@ library(tidyverse)
 inputdir <- "data/recfin/raw/cte003"
 outputdir <- "data/recfin/processed"
 
+# Read species key
+spp_key <- readxl::read_excel(file.path("data/recfin/spp_key/RECFIN_species_key2_formatted.xlsx"), na="NA")
+
+
 # Merge data
 ################################################################################
 
@@ -29,6 +33,10 @@ data_orig <- purrr::map_df(files2merge, function(x){
     mutate(filename=x)
   
 })
+
+
+# Format data
+################################################################################
 
 # Format data
 data <- data_orig %>% 
@@ -54,9 +62,19 @@ data <- data_orig %>%
   # Spread
   spread(key="units", value="catch") %>% 
   rename(catch_n=NUM, catch_mt=MT) %>% 
+  # Add species info
+  rename(comm_name_orig=comm_name) %>% 
+  left_join(spp_key %>% select(comm_name_orig, comm_name, sci_name, level, category)) %>% 
+  rename(taxa_catg=category) %>% 
   # Arrange
-  select(state, mode, comm_name, year, catch_n, catch_mt, everything()) %>% 
-  arrange(state, mode, comm_name, year)
+  select(state, mode, taxa_catg, comm_name_orig, comm_name, sci_name, level, 
+         year, catch_n, catch_mt, everything()) %>% 
+  arrange(state, mode, taxa_catg, comm_name, year)
+
+# Inspects
+freeR::complete(data)
+table(data$state)
+table(data$mode)
 
 # Export data
 saveRDS(data, file=file.path(outputdir, "RECFIN_2001_2021_CTE003_rec_mort_by_mode.Rds"))

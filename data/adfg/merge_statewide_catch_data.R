@@ -32,9 +32,11 @@ data <- catch %>%
   # Discards
   mutate(discards_n=catch_n-retained_n) %>% 
   # Add species
+  rename(comm_name_orig=comm_name) %>% 
   left_join(spp_key) %>% 
   # Arrange
-  select(mgmt_group, comm_name, sci_name, everything())
+  select(-comm_name_orig) %>% 
+  select(mgmt_group, taxa_catg, comm_name, sci_name, level, everything())
 
 # Inspect
 freeR::complete(data)

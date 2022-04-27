@@ -47,7 +47,19 @@ data <- bind_rows(data_or_orig, data_wa_orig) %>%
                          "Wa Northern Coast"="Northern Washington Coast",
                          "Wa Southern Coast"="Southern Washington Coast")) %>% 
   # Format common name
-  mutate(comm_name=stringr::str_to_sentence(comm_name))
+  mutate(comm_name=stringr::str_to_sentence(comm_name)) %>% 
+  # Add scientific name
+  mutate(sci_name=recode(comm_name,
+                         "Chinook salmon"="Oncorhynchus tshawytscha",
+                         "Chum salmon"="Oncorhynchus keta",
+                         "Coho salmon"="Oncorhynchus kisutch",
+                         "Pink salmon"="Oncorhynchus gorbuscha",
+                         "Salmon family"="Salmonidae spp.",
+                         "Sockeye salmon"="Oncorhynchus nerka")) %>% 
+  # Add level
+  mutate(level=ifelse(comm_name=="Salmon family", "group", "species")) %>% 
+  # Arrange
+  select(year:comm_name, sci_name, level, everything())
          
 
 # Inspect
@@ -63,6 +75,8 @@ table(data$district)
 table(data$water_area)
 table(data$mode)
 table(data$comm_name)
+table(data$sci_name)
+table(data$level)
 table(data$trip_type)
 
 # Export

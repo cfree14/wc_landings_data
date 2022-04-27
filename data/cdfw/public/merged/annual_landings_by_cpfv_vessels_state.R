@@ -52,9 +52,11 @@ data <- data_orig %>%
                           "Unspecified (jumbo squid included) fishes"="Fish")) %>% 
   # Add scientific name
   mutate(sci_name=harmonize_names(comm_name, "comm", "sci")) %>% 
+  # Add level
+  mutate(level=ifelse(grepl("spp", sci_name), "group", "species")) %>% 
   # Arrange
   select(-filename) %>% 
-  select(waters, comm_name, comm_name_orig, sci_name, year, landings_n, everything()) %>% 
+  select(waters, comm_name, comm_name_orig, sci_name, level, year, landings_n, everything()) %>% 
   arrange(waters, comm_name, year)
 
 # Inspect
@@ -63,9 +65,9 @@ range(data$year)
 
 # Inspect species
 spp_key <- data %>% 
-  select(comm_name, comm_name_orig, sci_name) %>% unique() %>% 
-  arrange(comm_name) %>% 
-  filter(is.na(sci_name)) %>% pull(comm_name)
+  select(comm_name, comm_name_orig, sci_name, level) %>% unique() %>% 
+  arrange(comm_name) #%>% 
+  #filter(is.na(sci_name)) %>% pull(comm_name)
 
 
 # Export data

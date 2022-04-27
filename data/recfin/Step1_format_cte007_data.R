@@ -40,8 +40,12 @@ data <- data_orig %>%
   mutate(state=stringr::str_to_title(state),
          agency=recode(agency, "C"="CDFW"),
          comm_name=stringr::str_to_sentence(comm_name)) %>% 
+  # Add level
+  mutate(level="species") %>% 
   # Remove useless columns
-  select(-c(download_date))
+  select(-c(download_date)) %>% 
+  # Arrange
+  select(year:sci_name, level, everything())
          
 
 # Inspect
@@ -57,6 +61,7 @@ table(data$water_area)
 table(data$water_area_code)
 table(data$mode)
 table(data$comm_name)
+table(data$sci_name)
 
 # Inspect species
 data %>% count(spp_code, comm_name, sci_name)

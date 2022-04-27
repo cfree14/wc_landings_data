@@ -13,6 +13,10 @@ library(tidyverse)
 inputdir <- "data/recfin/raw/cte002"
 outputdir <- "data/recfin/processed"
 
+# Read species key
+spp_key <- readxl::read_excel(file.path("data/recfin/spp_key/RECFIN_species_key2_formatted.xlsx"), na="NA")
+
+
 # Merge data
 ################################################################################
 
@@ -69,18 +73,25 @@ data <- data_orig %>%
   # Spread
   spread(key="units", value="catch") %>% 
   rename(catch_n=NUM, catch_mt=MT) %>% 
+  # Add species info
+  rename(comm_name_orig=comm_name) %>% 
+  left_join(spp_key %>% select(comm_name_orig, comm_name, sci_name, level, category)) %>% 
+  rename(taxa_catg=category) %>% 
   # Arrange
   select(-year1) %>% 
-  select(state, water_area, mode, trip_type, comm_name,
+  select(state, water_area, mode, trip_type, 
+         taxa_catg, comm_name_orig, comm_name, sci_name, level,  
          year, status, catch_n, catch_mt, everything()) %>% 
-  arrange(state, water_area, mode, trip_type, comm_name, year, status)
+  arrange(state, water_area, mode, trip_type, taxa_catg, comm_name, year, status)
 
 # Inspect
+freeR::complete(data)
 table(data$state)
 table(data$status)
 table(data$water_area)
 table(data$mode)
 table(data$trip_type)
+table(data$taxa_catg)
 
 
 # Export data
@@ -102,3 +113,4 @@ g <- ggplot(data, aes(x=year, y=catch_n/1e6, fill=status)) +
   # Theme
   theme_bw()
 g
+

@@ -10,11 +10,12 @@ library(RSelenium)
 library(tidyverse)
 
 # Directories
-outdir <- "data/recfin/processed"
+indir <- "data/recfin/processed"
+outdir <- "data/recfin/spp_key"
 
 # Directories
-cte2 <- readRDS(file=file.path(outdir, "RECFIN_2001_2021_CTE002_rec_mort_by_state.Rds"))
-cte3 <- readRDS(file=file.path(outdir, "RECFIN_2001_2021_CTE003_rec_mort_by_mode.Rds"))
+cte2 <- readRDS(file=file.path(indir, "RECFIN_2001_2021_CTE002_rec_mort_by_state.Rds"))
+cte3 <- readRDS(file=file.path(indir, "RECFIN_2001_2021_CTE003_rec_mort_by_mode.Rds"))
 
 # PACFIN species key
 pacfin_spp <- wcfish::pacfin_species %>% 
@@ -72,14 +73,17 @@ spp_unmatched <- spp_key1 %>%
   pull(comm_name)
 wcfish::check_names(spp_unmatched)
 
+# Get taxa info
+spp_taxa <- freeR::taxa(spp_key1)
+
 # Export
-write.csv(spp_key1, file=file.path(outdir, "RECFIN_species_key_raw.csv"), row.names=F)
+write.csv(spp_key1, file=file.path(outdir, "RECFIN_species_key1.csv"), row.names=F)
 
 # Check species key
 ################################################################################
 
 # Read formatted key
-spp_key2 <- readxl::read_excel(file.path(outdir, "RECFIN_species_key.xlsx"))
+spp_key2 <- readxl::read_excel(file.path(outdir, "RECFIN_species_key1_formatted.xlsx"))
 
 # Any wrong? 
 # These are all correct: 
@@ -90,5 +94,15 @@ freeR::check_names(spp_key2$sci_name)
 # Any duplicated?
 anyDuplicated(spp_key2$sci_name[!is.na(spp_key2$sci_name)])
 
+# Look up taxaonomy
+taxa_spp <- freeR::taxa(spp_key2$sci_name) %>% 
+  filter(!is.na(sciname) & !is.na(class))
+
+# Append taxanomy
+spp_key3 <- spp_key2 %>% 
+  left_join(taxa_spp, by=c("sci_name"="sciname"))
+
+# Export
+write.csv(spp_key3, file=file.path(outdir, "RECFIN_species_key2.csv"), row.names = F)
 
 
