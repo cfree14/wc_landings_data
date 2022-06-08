@@ -11,8 +11,8 @@ library(tabulizer)
 library(pdftools)
 
 # Directories
-datadir <- "data/landings/cdfw/public/website_licenses/commercial/raw"
-outputdir <- "data/landings/cdfw/public/website_licenses/commercial/processed"
+datadir <- "data/cdfw/public/website_licenses/commercial/raw"
+outputdir <- "data/cdfw/public/website_licenses/commercial/processed"
 
 # TO DO
 # You could probably format the license names and types more nicely
