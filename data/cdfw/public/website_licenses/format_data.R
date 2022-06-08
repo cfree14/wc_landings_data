@@ -54,6 +54,35 @@ data <- data_orig %>%
   mutate(year=gsub("X", "", year) %>% as.numeric()) %>% 
   # Convert revenues to numeric
   mutate(revenues_usd=gsub("\\$|,|-", "", revenues_usd) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
+
+
+
+# Format data for plotting
+############################################
+
+# Format data
+data1 <- data %>% 
+  filter(category=="Licenses")
+
+
+# Plot data
+ggplot(data=data1, mapping=aes(x=year, y=revenues_usd/1e6, fill=license)) +
+  geom_bar(stat="identity") +
+  # Labels
+  labs(x="Year", y="Revenues (USD millions)", title="Revenues from comm. fishing licenses, 2000-2009") +
+  # Axes
+  # c(2000, 2005, 2010); seq(2000, 2010, 2)
+  scale_x_continuous(breaks=2000:2010) +
+  # Legend
+  scale_fill_discrete(name="License") +
+  # Theme
+  theme_classic()
+
+
+
+
+
+
   
   
   
