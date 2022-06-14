@@ -152,6 +152,8 @@ data10 <- data_2010 %>%
 data20 <- data_2020 %>%
   # Rename a column
   rename(license=Licenses) %>% 
+  # Remove empty columns
+  select(-c(X:X.10)) %>% 
   # Remove missing rows
   filter_all(any_vars(!is.na(.))) %>%
   # Create new columns to label license categories
