@@ -38,7 +38,11 @@ data70 <- data_1970 %>%
   # Gather
   gather(key="year", value="revenues_usd", 5:ncol(.)) %>% 
   # Convert year to numeric
-  mutate(year=gsub("X", "", year) %>% as.numeric()) %>% 
+  mutate(year=gsub("X", "", year),
+         year=recode(year, 
+                     "1975.1"="1976",
+                     "1977.1"="1979",
+                     ) %>% as.numeric()) %>% 
   # Convert revenues to numeric
   mutate(revenues_usd=gsub("\\$|,|-", "", revenues_usd) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
 

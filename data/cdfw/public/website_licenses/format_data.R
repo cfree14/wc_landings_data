@@ -67,7 +67,7 @@ data1 <- data %>%
 
 # Plot data
 ggplot(data=data1, mapping=aes(x=year, y=revenues_usd/1e6, fill=license)) +
-  geom_bar(stat="identity") +
+  geom_bar(stat="identity", color="grey30") +
   # Labels
   labs(x="Year", y="Revenues (USD millions)", title="Revenues from comm. fishing licenses, 2000-2009") +
   # Axes
