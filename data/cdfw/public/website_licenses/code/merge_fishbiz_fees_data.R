@@ -3,15 +3,15 @@
 library(tidyverse)
 
 # Directories
-datadir <- "data/cdfw/public/website_licenses/"
+datadir <- "data/cdfw/public/website_licenses/data/intermediate/csvs/"
 
 # Read data
-data_1970 <- read.csv(file.path(datadir, "tabula-70s Fees Commercial Fishing.csv"), na.strings=c("N/A", "", NA))
-data_1980 <- read.csv(file.path(datadir, "tabula-80s Fees Commercial Fishing.csv"), na.strings=c("N/A", "", NA))
-data_1990 <- read.csv(file.path(datadir, "tabula-90s Fees Commercial Fishing.csv"), na.strings=c("N/A", "", NA))
-data_2000 <- read.csv(file.path(datadir, "tabula-2000s Fees Commercial Fishing.csv"), na.strings=c("N/A", "", NA))
-data_2010 <- read.csv(file.path(datadir, "tabula-2010s Fees Commercial Fish.csv"), na.strings=c("N/A", "", NA))
-data_2020 <- read.csv(file.path(datadir, "tabula-2020s Fees Commercial FishingADA.csv"), na.strings=c("N/A", "", NA))
+data_1970 <- read.csv(file.path(datadir, "tabula-70s Fees Fish Business.csv"), na.strings=c("N/A", ""))
+data_1980 <- read.csv(file.path(datadir, "tabula-80s Fees Fish Business.csv"), na.strings=c("N/A", ""))
+data_1990 <- read.csv(file.path(datadir, "tabula-90s Fees Fish Business.csv"), na.strings=c("N/A", ""))
+data_2000 <- read.csv(file.path(datadir, "tabula-2000s Fees Fish Business.csv"), na.strings=c("N/A", ""))
+data_2010 <- read.csv(file.path(datadir, "tabula-2010s Fees Fish Business.csv"), na.strings=c("N/A", ""))
+data_2020 <- read.csv(file.path(datadir, "tabula-2020s Fees Fish BusinessADA.csv"), na.strings=c("N/A", ""))
 
 # Format 1970s data
 data70 <- data_1970 %>%
@@ -30,13 +30,16 @@ data70 <- data_1970 %>%
   filter(license!=stringr::str_to_title(license)) %>% 
   # Add some useful columns
   mutate(decade="1970s",
-         filename="tabula-70s Fees Commercial Fishing.csv") %>% 
+         filename="tabula-70s Fees Fish Business.csv") %>% 
   # Rearrange the columns
   select(filename, decade, category, everything()) %>% 
   # Gather
   gather(key="year", value="fees_usd", 5:ncol(.)) %>% 
   # Convert year to numeric
-  mutate(year=gsub("X", "", year) %>% as.numeric()) %>% 
+  mutate(year=gsub("X", "", year),
+         year=recode(year, 
+                     "1975.1"="1976",
+                     "1977.1"="1979",) %>% as.numeric()) %>% 
   # Convert fees to numeric
   mutate(fees_usd=gsub("\\$|,|-", "", fees_usd) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
 
@@ -57,7 +60,7 @@ data80 <- data_1980 %>%
   filter(license!=stringr::str_to_title(license)) %>% 
   # Add some useful columns
   mutate(decade="1980s",
-         filename="tabula-80s Fees Commercial Fishing.csv") %>% 
+         filename="tabula-80s Fees Fish Business.csv") %>% 
   # Rearrange the columns
   select(filename, decade, category, everything()) %>% 
   # Gather
@@ -85,7 +88,7 @@ data90 <- data_1990 %>%
   filter(license!=stringr::str_to_title(license)) %>% 
   # Add some useful columns
   mutate(decade="1990s",
-         filename="tabula-90s Fees Commercial Fishing.csv") %>% 
+         filename="tabula-90s Fees Fish Business.csv") %>% 
   # Rearrange the columns
   select(filename, decade, category, everything()) %>% 
   # Gather
@@ -112,7 +115,7 @@ data00 <- data_2000 %>%
   filter(license!=stringr::str_to_title(license)) %>% 
   # Add some useful columns
   mutate(decade="2000s",
-         filename="tabula-2000s Fees Commercial Fishing.csv") %>% 
+         filename="tabula-2000s Fees Fish Business.csv") %>% 
   # Rearrange the columns
   select(filename, decade, category, everything()) %>% 
   # Gather
@@ -139,7 +142,7 @@ data10 <- data_2010 %>%
   filter(license!=stringr::str_to_title(license)) %>% 
   # Add some useful columns
   mutate(decade="2010s",
-         filename="tabula-2010s Fees Commercial Fishing.csv") %>% 
+         filename="tabula-2010s Fees Fish Business.csv") %>% 
   # Rearrange the columns
   select(filename, decade, category, everything()) %>% 
   # Gather
@@ -153,6 +156,8 @@ data10 <- data_2010 %>%
 data20 <- data_2020 %>%
   # Rename a column
   rename(license=Licenses) %>% 
+  # Remove empty columns
+  select(-c(X, X.1, X.2, X.3, X.4, X.5, X.6)) %>% 
   # Remove missing rows
   filter_all(any_vars(!is.na(.))) %>%
   # Create new columns to label license categories
@@ -165,8 +170,8 @@ data20 <- data_2020 %>%
   # Remove header rows
   filter(license!=stringr::str_to_title(license)) %>% 
   # Add some useful columns
-  mutate(decade="2000s",
-         filename="tabula-2000s Fees Commercial Fishing.csv") %>% 
+  mutate(decade="2020s",
+         filename="tabula-2020s Fees Fish Business.csv") %>% 
   # Rearrange the columns
   select(filename, decade, category, everything()) %>% 
   # Gather
@@ -180,5 +185,5 @@ data20 <- data_2020 %>%
 all_data <- rbind(data70, data80, data90, data00, data10, data20)
 
 # Save to csv
-write.csv(all_data, "AllDecadesFeesCommercialFishing")
+write.csv(all_data, "AllDecadesFeesFishBusiness")
 

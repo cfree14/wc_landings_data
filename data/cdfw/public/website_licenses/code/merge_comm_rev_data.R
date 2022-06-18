@@ -3,7 +3,7 @@
 library(tidyverse)
 
 # Directories
-datadir <- "data/cdfw/public/website_licenses/"
+datadir <- "data/cdfw/public/website_licenses/data/intermediate/csvs/"
 
 # Read data
 data_1970 <- read.csv(file.path(datadir, "tabula-70s Revenue Commercial Fishing.csv"), na.strings=c("N/A", ""))
@@ -29,7 +29,7 @@ data70 <- data_1970 %>%
   # Remove header rows
   filter(license!=stringr::str_to_title(license)) %>% 
   # Remove total rows 
-  filter(!grepl("TOTAL COMMERCIAL FISHING", license)) %>%
+  filter(!grepl("TOTAL COMMERCIAL", license)) %>%
   # Add some useful columns
   mutate(decade="1970s",
          filename="tabula-70s Revenue Commercial Fishing.csv") %>% 
@@ -46,6 +46,8 @@ data70 <- data_1970 %>%
 data80 <- data_1980 %>%
   # Rename a column
   rename(license=Licenses) %>% 
+  # Remove empty columns
+  select(-c(X)) %>% 
   # Remove missing rows
   filter_all(any_vars(!is.na(.))) %>%
   # Create new columns to label license categories
@@ -59,6 +61,10 @@ data80 <- data_1980 %>%
   filter(license!=stringr::str_to_title(license)) %>% 
   # Remove total rows 
   filter(!grepl("TOTAL COMMERCIAL FISHING", license)) %>%
+  # Fix license names that got cut-off
+  mutate(license=recode(license, 
+                        "HERRING GILL NET PERMIT(R)"="HERRING GILL NET PERMIT (R)",
+                        "HERRING GILL NET PERMIT(NR)"="HERRING GILL NET PERMIT (NR)")) %>%
   # Add some useful columns
   mutate(decade="1980s",
          filename="tabula-80s Revenue Commercial Fishing.csv") %>% 
@@ -88,6 +94,10 @@ data90 <- data_1990 %>%
   filter(license!=stringr::str_to_title(license)) %>% 
   # Remove total rows 
   filter(!grepl("TOTAL COMMERCIAL FISHING", license)) %>%
+  # Fix license names that got cut-off
+  mutate(license=recode(license, 
+                        "HERRING GILL NET PERMIT(R)"="HERRING GILL NET PERMIT (R)",
+                        "HERRING GILL NET PERMIT(NR)"="HERRING GILL NET PERMIT (NR)")) %>%
   # Add some useful columns
   mutate(decade="1990s",
          filename="tabula-90s Revenue Commercial Fishing.csv") %>% 
@@ -115,6 +125,16 @@ data00 <- data_2000 %>%
   mutate(category=ifelse(is.na(category), "Licenses", category)) %>% 
   # Remove header rows
   filter(license!=stringr::str_to_title(license)) %>% 
+  # Remove total rows 
+  filter(!grepl("TOTAL COMMERCIAL FISHING", license)) %>%
+  # Fix license names that got cut-off
+  mutate(license=recode(license, 
+                        "HERRING GILL NET PERMIT(R)"="HERRING GILL NET PERMIT (R)",
+                        "HERRING GILL NET PERMIT(NR)"="HERRING GILL NET PERMIT (NR)",
+                        "NEARSHORE TRAP ENDORSEMENT - N. CENTRAL COA"=
+                          "NEARSHORE TRAP ENDORSEMENT - N. CENTRAL COAST",
+                        "NEARSHORE TRAP ENDORSEMENT - S. CENTRAL COA"=
+                          "NEARSHORE TRAP ENDORSEMENT - S. CENTRAL COAST")) %>%
   # Add some useful columns
   mutate(decade="2000s",
          filename="tabula-2000s Revenue Commercial Fishing.csv") %>% 
@@ -162,6 +182,8 @@ data20 <- data_2020 %>%
   rename(license=Licenses) %>% 
   # Remove missing rows
   filter_all(any_vars(!is.na(.))) %>%
+  # Remove 2029 rows
+  filter_all(any_vars(license!="2029")) %>%
   # Create new columns to label license categories
   mutate(category=ifelse(license==stringr::str_to_title(license), license, NA)) %>% 
   select(category, everything()) %>% 
@@ -172,7 +194,7 @@ data20 <- data_2020 %>%
   # Remove header rows
   filter(license!=stringr::str_to_title(license)) %>% 
   # Remove total rows 
-  filter(!grepl("TOTAL COMMERCIAL FISHING", license)) %>%
+  filter(!grepl("Total Commercial Fishing", license)) %>%
   # Add some useful columns
   mutate(decade="2020s",
          filename="tabula-2020s Revenue Commercial FishingADA.csv") %>% 

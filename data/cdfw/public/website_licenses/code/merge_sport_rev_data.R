@@ -4,7 +4,7 @@ library(tidyverse)
 library(dplyr)
 
 # Directories
-datadir <- "data/cdfw/public/website_licenses/"
+datadir <- "data/cdfw/public/website_licenses/data/intermediate/csvs/"
 
 # Read data
 data_1970 <- read.csv(file.path(datadir, "tabula-70s Revenue Sport Fishing.csv"), na.strings=c("N/A", ""))
@@ -57,8 +57,8 @@ data80 <- data_1980 %>%
   # Remove totals row
   filter(!grepl("TOTAL SPORT FISHING", license)) %>%
   # Add some useful columns
-  mutate(decade="80s",
-         filename="tabula-1980s Revenue Sport Fishing.csv") %>% 
+  mutate(decade="1980s",
+         filename="tabula-80s Revenue Sport Fishing.csv") %>% 
   # Rearrange the columns
   select(filename, decade, category, everything()) %>% 
   # Gather
@@ -84,8 +84,8 @@ data90 <- data_1990 %>%
   # Remove totals row
   filter(!grepl("TOTAL SPORT FISHING", license)) %>%
   # Add some useful columns
-  mutate(decade="90s",
-         filename="tabula-1990s Revenue Sport Fishing.csv") %>% 
+  mutate(decade="1990s",
+         filename="tabula-90s Revenue Sport Fishing.csv") %>% 
   # Rearrange the columns
   select(filename, decade, category, everything()) %>% 
   # Gather
@@ -156,6 +156,8 @@ data20 <- data_2020 %>%
   rename(license=Licenses) %>% 
   # Remove missing rows
   filter_all(any_vars(!is.na(.))) %>%
+  # Remove extra columns 
+  select(-c(X:X.10)) %>%
   # Create new columns to label license categories
   mutate(category=ifelse(substr(license, 1, 3)=="Sub", substr(license,13,nchar(license)), NA)) %>% 
   select(category, everything()) %>% 
@@ -180,16 +182,18 @@ data20 <- data_2020 %>%
 # Merge dataframes by rowbinding (since all columns are same)
 all_data <- rbind(data70, data80, data90, data00, data10, data20)
 
-# Filter data and save to csv
+# Clean data and save to csv
 all_data <- all_data %>%
+  # Fix spacing for license names
+  mutate(license=recode(license, "Non-Resident Fishing     (Annual)"="Non-Resident Fishing (Annual)",
+                        "Non-Resident Fishing (l0 Day)"="Non-Resident Fishing (10 Day)",
+                        "Pacific Ocean   (1 Day)"="Pacific Ocean (1 Day)",
+                        "Pacific Ocean   (3 Day)"="Pacific Ocean (3 Day)",
+                        "Pacific Ocean  (5 Day)"="Pacific Ocean (5 Day)",
+                        "Resident Fishing     (Annual)"="Resident Fishing (Annual)",
+                        "Non-Resident Fishing     (l0 Day)"="Non-Resident Fishing (10 Day)")) %>%
+  # Fix "Stamp" category names
+  mutate(category=recode(category, "Stamps"="Stamps & Report Cards")) %>%
   filter(category!="Subtotal")
 write.csv(all_data, "AllDecadesRevenueSportFishing")
 
-ggplot(data=all_data, mapping=aes(x=decade, y=revenues_usd/1e6, fill=license)) +
-  geom_bar(stat="identity") +
-  # Labels
-  labs(x="Decade", y="Revenues (USD millions)", title="Revenues from sport fishing licenses, 1970-2022") +
-  # Legend
-  scale_fill_discrete(name="License") +
-  # Theme
-  theme_classic()

@@ -3,7 +3,7 @@
 library(tidyverse)
 
 # Directories
-datadir <- "data/cdfw/public/website_licenses/"
+datadir <- "data/cdfw/public/website_licenses/data/intermediate/csvs/"
 
 # Read data
 data_1970 <- read.csv(file.path(datadir, "tabula-70s Revenue Hunting.csv"), na.strings=c("N/A", ""))
@@ -55,6 +55,9 @@ data80 <- data_1980 %>%
   mutate(category=ifelse(substr(license, 1, 3)=="Sub", "Subtotal", category)) %>% 
   # Remove totals row
   filter(!grepl("TOTAL", license)) %>%
+  # Fix capitalization and cut-off in category 
+  mutate(category=recode(category, "Bobcat tags"="Bobcat Tags", 
+                         "Antelope, Bighorn Sheep, Elk T"="Antelope, Bighorn Sheep, Elk Tags")) %>%
   # Add some useful columns
   mutate(decade="1980s",
          filename="tabula-80s Revenue Hunting.csv") %>% 
@@ -147,6 +150,7 @@ data10 <- data_2010 %>%
   mutate(year=gsub("X", "", year) %>% as.numeric()) %>% 
   # Convert revenues to numeric
   mutate(revenues_usd=gsub("\\$|,|-", "", revenues_usd) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
+  
 
 # Format 2020s data
 data20 <- data_2020 %>%
@@ -180,17 +184,17 @@ data20 <- data_2020 %>%
 # Merge dataframes by rowbinding (since all columns are same)
 all_data <- rbind(data70, data80, data90, data00, data10, data20)
 
-# Plot data
+# Filter data
 all_data <- all_data %>%
-  filter(category!="Subtotal")
-ggplot(data=all_data, mapping=aes(x=decade, y=revenues_usd/1e6, fill=license)) +
-  geom_bar(stat="identity") +
-  # Labels
-  labs(x="Decade", y="Revenues (USD millions)", title="Revenues from hunting licenses, 1970-2022") +
-  # Legend
-  scale_fill_discrete(name="License") +
-  # Theme
-  theme_classic()
+  filter(category!="Subtotal") %>%
+
+# Fix spacing in license column
+mutate(license=recode(license, "Junior Hunting     (Annual)"="Junior Hunting (Annual)",
+                      "Non-Resident Hunting     (Annual)"="Non-Resident Hunting (Annual)",
+                      "Non-Resident SecondDeer Tag"="Non-Resident Second Deer Tag",
+                      "Resident Hunting     (Annual)"= "Resident Hunting (Annual)")) %>%
+# Correct "Bear" category 
+mutate(category=recode(category, "Bear"="Bear Tags"))
 
 # Save as csv
 write.csv(all_data, "AllDecadesRevenueHunting")

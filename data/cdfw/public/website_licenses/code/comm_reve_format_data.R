@@ -5,7 +5,7 @@
 library(tidyverse)
 
 # Directories
-datadir <- "data/cdfw/public/website_licenses/"
+datadir <- "data/cdfw/public/website_licenses/data/intermediate/csvs/"
 
 # Read data
 data_orig <- read.csv(file.path(datadir, "tabula-2000s Revenue Commercial Fishing.csv"), na.strings=c("N/A", ""))
