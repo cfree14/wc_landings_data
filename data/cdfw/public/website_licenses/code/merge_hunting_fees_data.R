@@ -96,8 +96,7 @@ cat1 <- cat10 %>%
   mutate(category=ifelse(substr(license, 1, 3)=="Sub", "Subtotal", category)) %>% 
   # Remove subtotals and totals rows and lifetime packages rows
   filter(!grepl("Subtotal", category)) %>%
-  filter(!grepl("TOTAL", license)) %>%
-  filter(!grepl("Lifetime Packages", category))
+  filter(!grepl("TOTAL", license)) 
 cat2 <- cat20 %>%
   # Rename a column
   rename(license=Licenses) %>% 
@@ -214,7 +213,17 @@ data10 <- data_2010 %>%
   # Rename a column
   rename(license=Licenses) %>% 
   # Remove missing rows
-  filter_all(any_vars(!is.na(.))) %>%
+  filter_all(any_vars(!is.na(.))) 
+  # Add lifetime packages rows to match items and rev dataframes
+  row_names <- c("Lifetime Hunting Package - Age 0 to 9", "Lifetime Hunting Package - Age 10 to 39",
+                 "Lifetime Hunting Package - Age 40 to 61", "Lifetime Hunting Package - Age 62 and Over",
+                 "Lifetime Hunting Privilege Package - Big Game", "Lifetime Hunting Privilege Package - Game Bird")
+  data10 <- rbind(data10, c(row_names[1], rep(NA,10))) %>%
+    rbind(c(row_names[2], rep(NA,10))) %>%
+    rbind(c(row_names[3], rep(NA,10))) %>%
+    rbind(c(row_names[4], rep(NA,10))) %>%
+    rbind(c(row_names[5], rep(NA,10))) %>%
+    rbind(c(row_names[6], rep(NA,10))) %>%
   # Extract category column from revenue dataframe
   mutate(category=cat1$category) %>%
   # Remove totals row
@@ -272,5 +281,6 @@ mutate(license=recode(license, "Junior Hunting     (Annual)"="Junior Hunting (An
 mutate(category=recode(category, "Bear"="Bear Tags", "Bobcat tags"="Bobcat Tags",
                        "Antelope, Bighorn Sheep, Elk T"="Antelope, Bighorn Sheep, Elk Tags"))
 
-# Save as csv
-write.csv(all_data, "AllDecadesFeesHunting")
+# Save to csv
+path <- "data/cdfw/public/website_licenses/data/intermediate/combined_decades/"
+write.csv(all_data, file.path(path, "AllDecadesFeesHunting"))

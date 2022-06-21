@@ -252,6 +252,9 @@ data20 <- data_2020 %>%
   # Convert fees to numeric
   mutate(fees_usd=gsub("\\$|,|-", "", fees_usd) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
 
+# Merge dataframes by rowbinding (since all columns are same)
+all_data <- rbind(data70, data80, data90, data00, data10, data20)
+
 # Clean data and save to csv
 all_data <- all_data %>%
   # Fix spacing for license names
@@ -265,6 +268,7 @@ all_data <- all_data %>%
   # Fix "Stamp" category names
   mutate(category=recode(category, "Stamps"="Stamps & Report Cards")) %>%
   filter(category!="Subtotal")
-write.csv(all_data, "AllDecadesRevenueSportFishing")
 
-
+# Save to csv
+path <- "data/cdfw/public/website_licenses/data/intermediate/combined_decades/"
+write.csv(all_data, file.path(path, "AllDecadesFeesSportFishing"))

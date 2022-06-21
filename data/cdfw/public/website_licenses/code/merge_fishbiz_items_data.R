@@ -6,12 +6,12 @@ library(tidyverse)
 datadir <- "data/cdfw/public/website_licenses/data/intermediate/csvs/"
 
 # Read data
-data_1970 <- read.csv(file.path(datadir, "tabula-70s Revenue Commercial Fishing.csv"), na.strings=c("N/A", ""))
-data_1980 <- read.csv(file.path(datadir, "tabula-80s Revenue Commercial Fishing.csv"), na.strings=c("N/A", ""))
-data_1990 <- read.csv(file.path(datadir, "tabula-90s Revenue Commercial Fishing.csv"), na.strings=c("N/A", ""))
-data_2000 <- read.csv(file.path(datadir, "tabula-2000s Revenue Commercial Fishing.csv"), na.strings=c("N/A", ""))
-data_2010 <- read.csv(file.path(datadir, "tabula-2010s Revenue Commercial Fish.csv"), na.strings=c("N/A", ""))
-data_2020 <- read.csv(file.path(datadir, "tabula-2020s Revenue Commercial FishingADA.csv"), na.strings=c("N/A", ""))
+data_1970 <- read.csv(file.path(datadir, "tabula-70s Items Fish Business.csv"), na.strings=c("N/A", ""))
+data_1980 <- read.csv(file.path(datadir, "tabula-80s Items Fish Business.csv"), na.strings=c("N/A", ""))
+data_1990 <- read.csv(file.path(datadir, "tabula-90s Items Fish Business.csv"), na.strings=c("N/A", ""))
+data_2000 <- read.csv(file.path(datadir, "tabula-2000s Items Fish Business.csv"), na.strings=c("N/A", ""))
+data_2010 <- read.csv(file.path(datadir, "tabula-2010s Items Fish Business.csv"), na.strings=c("N/A", ""))
+data_2020 <- read.csv(file.path(datadir, "tabula-2020s Items Fish BusinessADA.csv"), na.strings=c("N/A", ""))
 
 # Format 1970s data
 data70 <- data_1970 %>%
@@ -29,25 +29,27 @@ data70 <- data_1970 %>%
   # Remove header rows
   filter(license!=stringr::str_to_title(license)) %>% 
   # Remove total rows 
-  filter(!grepl("TOTAL COMMERCIAL", license)) %>%
+  filter(!grepl("TOTAL COMMERCIAL FISH BUSINESS", license)) %>%
   # Add some useful columns
   mutate(decade="1970s",
-         filename="tabula-70s Revenue Commercial Fishing.csv") %>% 
+         filename="tabula-70s Items Fish Business.csv") %>% 
   # Rearrange the columns
   select(filename, decade, category, everything()) %>% 
   # Gather
-  gather(key="year", value="revenues_usd", 5:ncol(.)) %>% 
+  gather(key="year", value="items", 5:ncol(.)) %>% 
   # Convert year to numeric
-  mutate(year=gsub("X", "", year) %>% as.numeric()) %>% 
-  # Convert revenues to numeric
-  mutate(revenues_usd=gsub("\\$|,|-", "", revenues_usd) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
+  mutate(year=gsub("X", "", year),
+         year=recode(year, 
+                     "1975.1"="1976",
+                     "1977.1"="1979",
+         ) %>% as.numeric()) %>% 
+  # Convert items to numeric
+  mutate(items=gsub("\\$|,|-", "", items) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
 
 # Format 1980s data
 data80 <- data_1980 %>%
   # Rename a column
   rename(license=Licenses) %>% 
-  # Remove empty columns
-  select(-c(X)) %>% 
   # Remove missing rows
   filter_all(any_vars(!is.na(.))) %>%
   # Create new columns to label license categories
@@ -60,32 +62,26 @@ data80 <- data_1980 %>%
   # Remove header rows
   filter(license!=stringr::str_to_title(license)) %>% 
   # Remove total rows 
-  filter(!grepl("TOTAL COMMERCIAL FISHING", license)) %>%
-  # Fix license names that got cut-off
-  mutate(license=recode(license, 
-                        "HERRING GILL NET PERMIT(R)"="HERRING GILL NET PERMIT (R)",
-                        "HERRING GILL NET PERMIT(NR)"="HERRING GILL NET PERMIT (NR)")) %>%
+  filter(!grepl("TOTAL COMMERCIAL FISH BUSINESS", license)) %>%
   # Add some useful columns
   mutate(decade="1980s",
-         filename="tabula-80s Revenue Commercial Fishing.csv") %>% 
+         filename="tabula-80s Items Fish Business.csv") %>% 
   # Rearrange the columns
   select(filename, decade, category, everything()) %>% 
   # Gather
-  gather(key="year", value="revenues_usd", 5:ncol(.)) %>% 
+  gather(key="year", value="items", 5:ncol(.)) %>% 
   # Convert year to numeric
   mutate(year=gsub("X", "", year) %>% as.numeric()) %>% 
-  # Convert revenues to numeric
-  mutate(revenues_usd=gsub("\\$|,|-", "", revenues_usd) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
+  # Convert items to numeric
+  mutate(items=gsub("\\$|,|-", "", items) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
+
 
 # Format 1990s data
 data90 <- data_1990 %>%
   # Rename a column
   rename(license=Licenses) %>% 
   # Remove missing rows
-  filter_all(any_vars(!is.na(.)))
-  # Insert row so dataframe matches items dataframe
-  newrow <- c("SALMON VESSEL LATE FEE", rep(NA, 10))
-  data90 <-rbind(data90[1:44,],newrow,data90[-(1:44),]) %>%
+  filter_all(any_vars(!is.na(.))) %>%
   # Create new columns to label license categories
   mutate(category=ifelse(license==stringr::str_to_title(license), license, NA)) %>% 
   select(category, everything()) %>% 
@@ -96,22 +92,18 @@ data90 <- data_1990 %>%
   # Remove header rows
   filter(license!=stringr::str_to_title(license)) %>% 
   # Remove total rows 
-  filter(!grepl("TOTAL COMMERCIAL FISHING", license)) %>%
-  # Fix license names that got cut-off
-  mutate(license=recode(license, 
-                        "HERRING GILL NET PERMIT(R)"="HERRING GILL NET PERMIT (R)",
-                        "HERRING GILL NET PERMIT(NR)"="HERRING GILL NET PERMIT (NR)")) %>%
+  filter(!grepl("TOTAL COMMERCIAL FISH BUSINESS", license)) %>%
   # Add some useful columns
   mutate(decade="1990s",
-         filename="tabula-90s Revenue Commercial Fishing.csv") %>% 
+         filename="tabula-90s Items Fish Business.csv") %>% 
   # Rearrange the columns
   select(filename, decade, category, everything()) %>% 
   # Gather
-  gather(key="year", value="revenues_usd", 5:ncol(.)) %>% 
+  gather(key="year", value="items", 5:ncol(.)) %>% 
   # Convert year to numeric
   mutate(year=gsub("X", "", year) %>% as.numeric()) %>% 
-  # Convert revenues to numeric
-  mutate(revenues_usd=gsub("\\$|,|-", "", revenues_usd) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
+  # Convert items to numeric
+  mutate(items=gsub("\\$|,|-", "", items) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
 
 # Format 2000s data
 data00 <- data_2000 %>% 
@@ -129,27 +121,20 @@ data00 <- data_2000 %>%
   # Remove header rows
   filter(license!=stringr::str_to_title(license)) %>% 
   # Remove total rows 
-  filter(!grepl("TOTAL COMMERCIAL FISHING", license)) %>%
-  # Fix license names that got cut-off
-  mutate(license=recode(license, 
-                        "HERRING GILL NET PERMIT(R)"="HERRING GILL NET PERMIT (R)",
-                        "HERRING GILL NET PERMIT(NR)"="HERRING GILL NET PERMIT (NR)",
-                        "NEARSHORE TRAP ENDORSEMENT - N. CENTRAL COA"=
-                          "NEARSHORE TRAP ENDORSEMENT - N. CENTRAL COAST",
-                        "NEARSHORE TRAP ENDORSEMENT - S. CENTRAL COA"=
-                          "NEARSHORE TRAP ENDORSEMENT - S. CENTRAL COAST")) %>%
+  filter(!grepl("TOTAL COMMERCIAL FISH BUSINESS", license)) %>%
   # Add some useful columns
   mutate(decade="2000s",
-         filename="tabula-2000s Revenue Commercial Fishing.csv") %>% 
+         filename="tabula-2000s Items Fish Business.csv") %>% 
   # Rearrange the columns
   select(filename, decade, category, everything()) %>% 
   # Gather
-  gather(key="year", value="revenues_usd", 5:ncol(.)) %>% 
+  gather(key="year", value="items", 5:ncol(.)) %>% 
   # Convert year to numeric
   mutate(year=gsub("X", "", year) %>% as.numeric()) %>% 
-  # Convert revenues to numeric
-  mutate(revenues_usd=gsub("\\$|,|-", "", revenues_usd) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
+  # Convert items to numeric
+  mutate(items=gsub("\\$|,|-", "", items) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
 
+  
 # Format 2010s data
 data10 <- data_2010 %>%
   # Rename a column
@@ -166,18 +151,18 @@ data10 <- data_2010 %>%
   # Remove header rows
   filter(license!=stringr::str_to_title(license)) %>% 
   # Remove total rows 
-  filter(!grepl("TOTAL COMMERCIAL FISHING", license)) %>%
+  filter(!grepl("TOTAL COMMERCIAL FISH BUSINESS", license)) %>%
   # Add some useful columns
   mutate(decade="2010s",
-         filename="tabula-2010s Revenue Commercial Fishing.csv") %>% 
+         filename="tabula-2010s Items Fish Business.csv") %>% 
   # Rearrange the columns
   select(filename, decade, category, everything()) %>% 
   # Gather
-  gather(key="year", value="revenues_usd", 5:ncol(.)) %>% 
+  gather(key="year", value="items", 5:ncol(.)) %>% 
   # Convert year to numeric
   mutate(year=gsub("X", "", year) %>% as.numeric()) %>% 
-  # Convert revenues to numeric
-  mutate(revenues_usd=gsub("\\$|,|-", "", revenues_usd) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
+  # Convert items to numeric
+  mutate(items=gsub("\\$|,|-", "", items) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
 
 # Format 2020s data
 data20 <- data_2020 %>%
@@ -185,8 +170,6 @@ data20 <- data_2020 %>%
   rename(license=Licenses) %>% 
   # Remove missing rows
   filter_all(any_vars(!is.na(.))) %>%
-  # Remove 2029 rows
-  filter_all(any_vars(license!="2029")) %>%
   # Create new columns to label license categories
   mutate(category=ifelse(license==stringr::str_to_title(license), license, NA)) %>% 
   select(category, everything()) %>% 
@@ -197,23 +180,22 @@ data20 <- data_2020 %>%
   # Remove header rows
   filter(license!=stringr::str_to_title(license)) %>% 
   # Remove total rows 
-  filter(!grepl("Total Commercial Fishing", license))  %>%
+  filter(!grepl("TOTAL COMMERCIAL FISH BUSINESS", license)) %>%
   # Add some useful columns
   mutate(decade="2020s",
-         filename="tabula-2020s Revenue Commercial FishingADA.csv") %>% 
+         filename="tabula-2020s Items Fish BusinessADA.csv") %>% 
   # Rearrange the columns
   select(filename, decade, category, everything()) %>% 
   # Gather
-  gather(key="year", value="revenues_usd", 5:ncol(.)) %>% 
+  gather(key="year", value="items", 5:ncol(.)) %>% 
   # Convert year to numeric
   mutate(year=gsub("X", "", year) %>% as.numeric()) %>% 
-  # Convert revenues to numeric
-  mutate(revenues_usd=gsub("\\$|,|-", "", revenues_usd) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
+  # Convert items to numeric
+  mutate(items=gsub("\\$|,|-", "", items) %>% trimws() %>% as.numeric()) # | = or, so replacing both $ and ,
 
 # Merge dataframes by rowbinding (since all columns are same)
 all_data <- rbind(data70, data80, data90, data00, data10, data20)
 
-# Save to csv
-path <- "data/cdfw/public/website_licenses/data/intermediate/combined_decades/"
-write.csv(all_data, file.path(path, "AllDecadesRevenueCommercialFishing"))
+# Save as csv
+write.csv(all_data, "AllDecadesItemsFishBusiness")
 

@@ -7,7 +7,7 @@ library(dplyr)
 datadir <- "data/cdfw/public/website_licenses/data/intermediate/csvs/"
 
 # Read data
-data_1970 <- read.csv(file.path(datadir, "tabula-70s Fees Special Permits.csv"), na.strings=c("N/A", ""))
+data_1970 <- read.csv(file.path(datadir, "tabula-70s Fees Special Permits.csv"), na.strings=c("N/A", "", "ea N/A"))
 data_1980 <- read.csv(file.path(datadir, "tabula-80s Fees Special Permits.csv"), na.strings=c("N/A", ""))
 data_1990 <- read.csv(file.path(datadir, "tabula-90s Fees Special Permits.csv"), na.strings=c("N/A", ""))
 data_2000 <- read.csv(file.path(datadir, "tabula-2000s Fees Special Permits.csv"), na.strings=c("N/A", ""))
@@ -63,7 +63,10 @@ data90 <- data_1990 %>%
   # Rename a column
   rename(license=Licenses) %>% 
   # Remove missing rows
-  filter_all(any_vars(!is.na(.))) %>%
+  filter_all(any_vars(!is.na(.))) 
+  # Add rows to match items dataframe
+  newrow <- c("Restricted Species Permit - Inspection Fee (Except Aquaculture & Fish)", rep(NA,10))
+  data90 <- rbind(data90[1:41,], newrow, data90[-(1:41),]) %>%
   # Create license category
   mutate(category="Licenses") %>% 
   # Remove totals row
@@ -85,7 +88,10 @@ data00 <- data_2000 %>%
   # Rename a column
   rename(license=Licenses) %>% 
   # Remove missing rows
-  filter_all(any_vars(!is.na(.))) %>%
+  filter_all(any_vars(!is.na(.))) 
+  # Add rows to match items dataframe
+  newrow <- c("Restricted Species Permit - Breeding", rep(NA,10))
+  data00 <- rbind(data00[1:37,], newrow, data00[-(1:37),]) %>%
   # Create license category
   mutate(category="Licenses") %>% 
   # Remove totals row
@@ -107,7 +113,10 @@ data10 <- data_2010 %>%
   # Rename a column
   rename(license=Licenses) %>% 
   # Remove missing rows
-  filter_all(any_vars(!is.na(.))) %>%
+  filter_all(any_vars(!is.na(.))) 
+  # Add rows to match items dataframe
+  newrow <- c("Scientific Collecting Permit Specific Use (Student)", rep(NA,10))
+  data10 <- rbind(data10[1:95,], newrow, data10[-(1:95),]) %>%
   # Create license category
   mutate(category="Licenses") %>% 
   # Remove totals row
@@ -158,5 +167,6 @@ all_data <- all_data %>%
                         "Aquaculture Registration - Interest (per month )"=
                           "Aquaculture Registration - Interest (per month)"))
 
-# Save into csv
-write.csv(all_data, "AllDecadesFeesSpecialPermits")
+# Save to csv
+path <- "data/cdfw/public/website_licenses/data/intermediate/combined_decades/"
+write.csv(all_data, file.path(path, "AllDecadesFeesSpecialPermits"))
