@@ -85,5 +85,6 @@ sport_data <- cbind(data_fees, data_items$items, data_rev$revenues_usd, row.name
   rename("items"="data_items$items", "revenues_usd"="data_rev$revenues_usd")
 
 # Save to csv
-write.csv(sport_data, "CDFWSportFishingRecords")
+path <- "data/cdfw/public/website_licenses/data/processed/"
+write.csv(sport_data, file.path(path, "CDFWSportFishingRecords"))
 
