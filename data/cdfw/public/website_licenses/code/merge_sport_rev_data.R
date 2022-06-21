@@ -82,7 +82,7 @@ data90 <- data_1990 %>%
   # Change category for sub total rows
   mutate(category=ifelse(substr(license, 1, 3)=="Sub", "Subtotal", category)) %>% 
   # Remove totals row
-  filter(!grepl("TOTAL SPORT FISHING", license)) %>%
+  filter(!grepl("TOTAL SPORT FISHING", license)) %>% 
   # Add some useful columns
   mutate(decade="1990s",
          filename="tabula-90s Revenue Sport Fishing.csv") %>% 
@@ -195,5 +195,6 @@ all_data <- all_data %>%
   # Fix "Stamp" category names
   mutate(category=recode(category, "Stamps"="Stamps & Report Cards")) %>%
   filter(category!="Subtotal")
-write.csv(all_data, "AllDecadesRevenueSportFishing")
+path <- "data/cdfw/public/website_licenses/data/intermediate/combined_decades/"
+write.csv(all_data, file.path(path, "AllDecadesRevenueSportFishing"))
 

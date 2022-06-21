@@ -98,8 +98,7 @@ cat1 <- cat10 %>%
   mutate(category=ifelse(substr(license, 1, 3)=="Sub", "Subtotal", category)) %>% 
   # Remove subtotals and totals rows and extra row that isn't in fees df
   filter(!grepl("Subtotal", category)) %>%
-  filter(!grepl("TOTAL SPORT FISHING", license)) %>%
-  filter(!grepl("Lifetime Fishing Privilege Package", license))
+  filter(!grepl("TOTAL SPORT FISHING", license)) 
 cat2 <- cat20 %>%
   # Rename a column
   rename(license=Licenses) %>% 
@@ -168,6 +167,8 @@ data90 <- data_1990 %>%
   rename(license=Licenses) %>% 
   # Remove missing rows
   filter_all(any_vars(!is.na(.))) %>%
+  # Remove extra row 
+  select(-X) %>%
   # Extract category column from revenue dataframe
   mutate(category=cat9$category) %>%
   # Remove totals row
@@ -211,7 +212,10 @@ data10 <- data_2010 %>%
   # Rename a column
   rename(license=Licenses) %>% 
   # Remove missing rows
-  filter_all(any_vars(!is.na(.))) %>%
+  filter_all(any_vars(!is.na(.))) 
+  # Add row to match to items and revenue dataframes
+  newrow <- c("Lifetime Fishing Privilege Package", rep(NA, 10))
+  data10 <- rbind(data10, newrow) %>%
   # Extract category column from revenue dataframe
   mutate(category=cat1$category) %>%
   # Remove totals row
