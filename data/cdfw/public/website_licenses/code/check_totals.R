@@ -6,11 +6,11 @@ library(purrr)
 # Directories
 datadir <- "data/cdfw/public/website_licenses/data/processed/"
 
-comm <- read.csv(file.path(datadir, "CDFWCommercialFishingRecords")) 
-fishbiz <- read.csv(file.path(datadir, "CDFWFishBusinessRecords"))
-hunting <- read.csv(file.path(datadir, "CDFWHuntingRecords"))
-special <- read.csv(file.path(datadir, "CDFWSpecialPermitsRecords"))
-sport <- read.csv(file.path(datadir, "CDFWSportFishingRecords"))
+comm <- read.csv(file.path(datadir, "CDFWCommercialFishingRecords.csv")) 
+fishbiz <- read.csv(file.path(datadir, "CDFWFishBusinessRecords.csv"))
+hunting <- read.csv(file.path(datadir, "CDFWHuntingRecords.csv"))
+special <- read.csv(file.path(datadir, "CDFWSpecialPermitsRecords.csv"))
+sport <- read.csv(file.path(datadir, "CDFWSportFishingRecords.csv"))
 
 ################### # Functions
 # Function for finding sum of license fees for that year
@@ -33,12 +33,10 @@ rev_sum <- function(dataframe, y) {
 }
 # Make totals dataframe  (helper method)
 make_df <- function(wholedf, totdf) {
-  f <-map(years, function(x) fees_sum(dataframe=wholedf, y=x))
-  i <-map(years, function(x) items_sum(dataframe=wholedf, y=x))
-  r <-map(years, function(x) rev_sum(dataframe=wholedf, y=x))
-  totdf$fees_total <- f
-  totdf$items_total <- i
-  totdf$rev_total <- r
+  totdf <- totdf %>%
+    mutate(fees_total=map(years, function(x) fees_sum(dataframe=wholedf, y=x))) %>%
+    mutate(items_total=map(years, function(x) items_sum(dataframe=wholedf, y=x))) %>%
+    mutate(rev_total=map(years, function(x) rev_sum(dataframe=wholedf, y=x)))
 }
 # Function that makes a dataframe with totals for fees, items, revenue for all 
   #  fifty years for dataframe in argument

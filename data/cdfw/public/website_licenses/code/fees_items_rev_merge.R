@@ -20,7 +20,8 @@ fish_data <- cbind(data_fees, data_items$items, data_rev$revenues_usd, row.names
   rename("items"="data_items$items", "revenues_usd"="data_rev$revenues_usd")
 
 # Save to csv
-write.csv(fish_data, "CDFWFishBusinessRecords")
+path <- "data/cdfw/public/website_licenses/data/processed/"
+write.csv(fish_data, file.path(path, "CDFWFishBusinessRecords.csv"))
 
 #############################
 # Commercial Fishing
@@ -37,7 +38,7 @@ comm_data <- data_items %>%
   
 # Save to csv
 path <- "data/cdfw/public/website_licenses/data/processed/"
-write.csv(comm_data, file.path(path, "CDFWCommercialFishingRecords"))
+write.csv(comm_data, file.path(path, "CDFWCommercialFishingRecords.csv"))
 
 #############################
 # Hunting
@@ -54,7 +55,7 @@ hunting_data <- data_items %>%
 
 # Save to csv
 path <- "data/cdfw/public/website_licenses/data/processed/"
-write.csv(hunting_data, file.path(path, "CDFWHuntingRecords"))
+write.csv(hunting_data, file.path(path, "CDFWHuntingRecords.csv"))
 
 #############################
 # Special Permits
@@ -70,7 +71,7 @@ special_data <- cbind(data_fees, data_items$items, data_rev$revenues_usd, row.na
 
 # Save to csv
 path <- "data/cdfw/public/website_licenses/data/processed/"
-write.csv(special_data, file.path(path, "CDFWSpecialPermitsRecords"))
+write.csv(special_data, file.path(path, "CDFWSpecialPermitsRecords.csv"))
 
 #############################
 # Sport Fishing
@@ -86,5 +87,5 @@ sport_data <- cbind(data_fees, data_items$items, data_rev$revenues_usd, row.name
 
 # Save to csv
 path <- "data/cdfw/public/website_licenses/data/processed/"
-write.csv(sport_data, file.path(path, "CDFWSportFishingRecords"))
+write.csv(sport_data, file.path(path, "CDFWSportFishingRecords.csv"))
 
