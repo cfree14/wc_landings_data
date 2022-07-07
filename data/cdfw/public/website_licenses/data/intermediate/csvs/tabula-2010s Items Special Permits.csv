@@ -44,6 +44,8 @@ Restricted Species Permit - Application Fee (Amended or Renewal),323,286,325,282
 Restricted Species Permit - Application Fee (New),N/A,26,27,40,14,17,10,11,6,8
 Restricted Species Permit - Aquaculture,N/A,1,0,1,1,1,0,1,1,1
 "Restricted Species Permit - AZA, Detrimental",25,21,20,17,19,20,22,20,20,20
+Restricted Species Permit - Breeding,22,13,12,12,11,13,8,9,9,11
+Licenses,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019
 Restricted Species Permit - Broker/Dealer (R),6,3,7,6,5,5,5,3,4,4
 Restricted Species Permit - Broker/Dealer (NR),3,1,1,2,1,1,2,1,1,1
 Restricted Species Permit - ELE & MOU Fee,N/A,N/A,N/A,20,34,35,27,6,14,30
@@ -89,6 +91,8 @@ Scientific Collecting Permit Specific Use Amendment Fee (Student),N/A,N/A,N/A,N/
 Scientific Collecting Permit General Use - Inland Fisheries,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,0,31
 Scientific Collecting Permit General Use - Inland Fisheries (Student),N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,0,2
 Scientific Collecting Permit General Use  - Marine,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,2,37
+Scientific Collecting Permit General Use  - Marine (Student),N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,0,5
+Licenses,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019
 Scientific Collecting Permit General Use - Terrestrial Wildlife,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,0,27
 Scientific Collecting Permit General Use - Terrestrial Wildlife (Student),N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,0,5
 Scientific Collecting Permit Specific Use,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,1,244
@@ -103,4 +107,3 @@ Trapping License (NR) (Recreational),4,5,5,5,5,0,0,0,0,0
 Trapping License (NR) (Recreational/Pest Control),N/A,N/A,N/A,0,2,0,0,1,0,0
 Trapping License  (NR) (Pest Control Only),N/A,N/A,N/A,1,1,1,4,3,2,2
 Warden Stamp,"6,037","3,200","2,443","4,036","3,744","4,469","4,058","4,871","5,685","4,630"
-TOTALSPECIAL PERMITS,"258,556","257,553","240,531","242,356","221,601","191,059","211,127","165,351","199,788","206,198"

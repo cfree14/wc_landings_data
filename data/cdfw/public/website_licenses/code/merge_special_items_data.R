@@ -107,14 +107,11 @@ data10 <- data_2010 %>%
   # Rename a column
   rename(license=Licenses) %>% 
   # Remove missing rows
-  filter_all(any_vars(!is.na(.))) 
-  # Add missing rows to match revenue dataframe
-  newrow <- c("Restricted Species Permit - Breeding", rep(NA,10))
-  data10 <- rbind(data10[1:45,], newrow, data10[-(1:45),])
-  newrow2 <- c("Scientific Collecting Permit General Use  - Marine (Student)", rep(NA,10))
-  data10 <- rbind(data10[1:91,], newrow2, data10[-(1:91),]) %>%
+  filter_all(any_vars(!is.na(.))) %>%
   # Create license category
   mutate(category="Licenses") %>% 
+  # Remove header rows
+  filter(license!="Licenses") %>% 
   # Remove totals row
   filter(!grepl("TOTALSPECIAL PERMITS", license)) %>%
   # Add some useful columns
@@ -134,12 +131,11 @@ data20 <- data_2020 %>%
   # Rename a column
   rename(license=Licenses) %>% 
   # Remove missing rows
-  filter_all(any_vars(!is.na(.))) 
-  # Add rows to match items dataframe
-  newrow <- c("Scientific Collecting Permit General Use Application Fee Inland Fisheries", rep(NA,10))
-  data20 <- rbind(data20[1:66,], newrow, data20[-(1:66),]) %>%
+  filter_all(any_vars(!is.na(.))) %>%
   # Create license category
-  mutate(category="Licenses") %>% 
+  mutate(category="Licenses") %>%
+  # Remove header rows
+  filter(license!="Licenses") %>% 
   # Remove totals row
   filter(!grepl("TOTAL MISCELLANEOUS", license)) %>%
   # Add some useful columns

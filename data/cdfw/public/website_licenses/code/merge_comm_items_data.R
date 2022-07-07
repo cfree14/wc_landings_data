@@ -11,7 +11,7 @@ data_1980 <- read.csv(file.path(datadir, "tabula-80s Items Commercial Fishing.cs
 data_1990 <- read.csv(file.path(datadir, "tabula-90s Items Commercial Fishing.csv"), na.strings=c("N/A", "", NA))
 data_2000 <- read.csv(file.path(datadir, "tabula-2000s Items Commercial Fishing.csv"), na.strings=c("N/A", "", NA))
 data_2010 <- read.csv(file.path(datadir, "tabula-2010s Items Commercial Fish.csv"), na.strings=c("N/A", "", NA))
-data_2020 <- read.csv(file.path(datadir, "tabula-2020s Items Commercial FishingADA.csv"), na.strings=c("N/A", "", NA))
+data_2020 <- read.csv(file.path(datadir, "tabula-2020s Items Commercial FishingADA.csv"), na.strings=c("N/A", "", NA, "-"))
 
 # Format 1970s data
 data70 <- data_1970 %>%

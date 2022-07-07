@@ -68,3 +68,59 @@ check_totals(hunting)
 check_totals(special)
 check_totals(sport)
 
+
+
+comm_totals_by_catg <- comm %>% 
+  group_by(category, year) %>% 
+  summarize(items=sum(items, na.rm=T)) %>% 
+  ungroup()
+
+comm_items <- comm %>% 
+  group_by(year) %>% 
+  summarize(items=sum(items, na.rm=T)) %>% 
+  ungroup()
+
+comm_revs <- comm %>% 
+  group_by(year) %>% 
+  summarize(revenues_usd=sum(revenues_usd, na.rm=T)) %>% 
+  ungroup()
+
+fish_items <- fishbiz %>% 
+  group_by(year) %>% 
+  summarize(items=sum(items, na.rm=T)) %>% 
+  ungroup()
+
+fish_revs <- fishbiz %>% 
+  group_by(year) %>% 
+  summarize(revenues_usd=sum(revenues_usd, na.rm=T)) %>% 
+  ungroup()
+
+hunt_items <- hunting %>% 
+  group_by(year) %>% 
+  summarize(items=sum(items, na.rm=T)) %>% 
+  ungroup()
+
+hunt_revs <- hunting %>% 
+  group_by(year) %>% 
+  summarize(revenues_usd=sum(revenues_usd, na.rm=T)) %>% 
+  ungroup()
+
+spec_items <- special %>% 
+  group_by(year) %>% 
+  summarize(items=sum(items, na.rm=T)) %>% 
+  ungroup()
+
+spec_revs <- special %>% 
+  group_by(year) %>% 
+  summarize(revenues_usd=sum(revenues_usd, na.rm=T)) %>% 
+  ungroup()
+
+sport_items <- sport %>% 
+  group_by(year) %>% 
+  summarize(items=sum(items, na.rm=T)) %>% 
+  ungroup()
+
+sport_revs <- sport %>% 
+  group_by(year) %>% 
+  summarize(revenues_usd=sum(revenues_usd, na.rm=T)) %>% 
+  ungroup()

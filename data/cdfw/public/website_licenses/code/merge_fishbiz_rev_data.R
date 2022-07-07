@@ -209,5 +209,6 @@ ggplot(data=all_data, mapping=aes(x=decade, y=revenues_usd/1e6, fill=license)) +
 # Filter data to remove subtotal rows
 
 # Save as csv
-write.csv(all_data, "AllDecadesRevenueFishBusiness")
+path <- "data/cdfw/public/website_licenses/data/intermediate/combined_decades/"
+write.csv(all_data, file.path(path, "AllDecadesRevenueFishBusiness"))
 
